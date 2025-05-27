@@ -1,0 +1,35 @@
+Motion Detection Log
+===================
+
+Motion Detected - 2025-05-27 22:55:08
+Motion Detected - 2025-05-27 22:55:08
+Motion Ended - Duration: 0.04 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:08
+Motion Detected - 2025-05-27 22:55:08
+Motion Ended - Duration: 0.04 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:08
+Motion Detected - 2025-05-27 22:55:08
+Motion Ended - Duration: 0.04 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:13
+Motion Detected - 2025-05-27 22:55:13
+Motion Ended - Duration: 0.44 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:14
+Motion Detected - 2025-05-27 22:55:15
+Motion Ended - Duration: 1.93 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:16
+Motion Detected - 2025-05-27 22:55:16
+Motion Ended - Duration: 0.40 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:21
+Motion Detected - 2025-05-27 22:55:21
+Motion Ended - Duration: 0.67 seconds
+--------------------------------------------------
+Motion Detected - 2025-05-27 22:55:30
+Motion Detected - 2025-05-27 22:55:30
+Motion Ended - Duration: 0.21 seconds
+--------------------------------------------------

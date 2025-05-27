@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+<div class="row">
+    <!-- User Management Section -->
+    <div class="col-md-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                        <i class="fas fa-users-cog"></i> User Management
+                </h5>
+                    <button class="btn btn-light btn-sm" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-info{% endif %}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                    <td>{{ user.last_login|default('Never logged in', true) }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-primary" 
+                                                onclick="updateRole('{{ user.id }}', '{{ 'user' if user.role == 'admin' else 'admin' }}')">
+                                                <i class="fas fa-exchange-alt"></i> Change Role
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                    onclick="deleteUser('{{ user.id }}')">
+                                                <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Statistics Section -->
+        <div class="col-md-4">
+            <!-- User Statistics Card -->
+            <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> User Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                            <span>Total Users:</span>
+                        <span class="badge bg-primary">{{ users|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                            <span>Admin Users:</span>
+                        <span class="badge bg-danger">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                            <span>Regular Users:</span>
+                        <span class="badge bg-info">{{ users|selectattr('role', 'equalto', 'user')|list|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-server"></i> System Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Motion Detection</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                            <span>Status:</span>
+                            <span class="badge bg-success" id="motionStatus">Active</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Last Motion:</span>
+                            <span class="badge bg-info" id="lastMotion">-</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h6>Recording Status</h6>
+                    <div class="d-flex justify-content-between">
+                            <span>Status:</span>
+                            <span class="badge bg-warning" id="recordingStatus">Monitoring</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="location.href='/dashboard'">
+                            <i class="fas fa-video"></i> Live Feed
+                        </button>
+                        <button class="btn btn-info" onclick="location.href='/recordings'">
+                            <i class="fas fa-film"></i> View Recordings
+                        </button>
+                        <button class="btn btn-success" onclick="location.href='/logs'">
+                            <i class="fas fa-list"></i> View Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateRole(userId, newRole) {
+    if (confirm('Are you sure you want to change this user\'s role?')) {
+        fetch('/update_role', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `user_id=${userId}&role=${newRole}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating role');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating role');
+        });
+    }
+}
+
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        fetch('/delete_user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `user_id=${userId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting user');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting user');
+        });
+    }
+}
+
+function refreshUsers() {
+    location.reload();
+}
+
+// Update system status
+function updateSystemStatus() {
+    fetch('/motion_status')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('motionStatus').textContent = data.motion ? 'Motion Detected' : 'Active';
+            document.getElementById('motionStatus').className = `badge ${data.motion ? 'bg-danger' : 'bg-success'}`;
+            document.getElementById('lastMotion').textContent = data.last_motion || '-';
+            document.getElementById('recordingStatus').textContent = data.motion ? 'Recording' : 'Monitoring';
+            document.getElementById('recordingStatus').className = `badge ${data.motion ? 'bg-danger' : 'bg-warning'}`;
+        })
+        .catch(error => console.error('Error updating status:', error));
+}
+
+// Update system status every 5 seconds
+setInterval(updateSystemStatus, 5000);
+updateSystemStatus(); // Initial load
+</script>
+{% endblock %} 

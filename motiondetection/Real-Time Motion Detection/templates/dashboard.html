@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Live Feed Section -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-video"></i> Live Feed
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="ratio ratio-16x9 d-flex align-items-center justify-content-center" style="background:#f5f6fa;">
+                    <img src="{{ url_for('video_feed') }}" alt="Live Feed" style="max-width:100%; max-height:100%; border-radius:8px; background:#222;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Section -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line"></i> System Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Motion Detection:</span>
+                    <span class="badge bg-success">Active</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Recording Status:</span>
+                    <span class="badge bg-warning">Monitoring</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Last Motion:</span>
+                    <span id="last-motion">2 minutes ago</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recordings Section -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-film"></i> Recordings
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for recording in recordings %}
+                    <a href="{{ url_for('play_recording', filename=recording) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-video me-2"></i>
+                                <span class="fw-bold">Recording #{{ loop.index }}</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fas fa-play"></i> Play
+                            </button>
+                        </div>
+                        <div class="mt-2">
+                            {% set date_str = recording.split('_')[1] %}
+                            {% set time_str = recording.split('_')[2].split('.')[0] %}
+                            <small class="text-muted">
+                                <i class="far fa-calendar-alt me-1"></i>
+                                {{ date_str[:4] }}-{{ date_str[4:6] }}-{{ date_str[6:8] }}
+                                <i class="far fa-clock ms-2 me-1"></i>
+                                {{ time_str[:2] }}:{{ time_str[2:4] }}:{{ time_str[4:6] }}
+                            </small>
+                        </div>
+                    </a>
+                    {% else %}
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-film fa-2x mb-2"></i>
+                        <p>No recordings available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Section -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Activity Logs
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="logs-container" style="max-height: 400px; overflow-y: auto;">
+                    {% for log in logs %}
+                    <div class="log-entry mb-2 p-2 border-bottom">
+                        <small class="text-muted">{{ log }}</small>
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                        <p>No logs available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-scroll logs to bottom
+    const logsContainer = document.querySelector('.logs-container');
+    logsContainer.scrollTop = logsContainer.scrollHeight;
+
+    // Short beep alarm
+    let alarmAudio = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b7bfa.mp3'); // short beep
+    let alarmPlaying = false;
+    let lastMotionState = false;
+
+    function updateMotionStatus() {
+        fetch('/motion_status')
+            .then(response => response.json())
+            .then(data => {
+                // Update last motion
+                if (data.last_motion) {
+                    document.getElementById('last-motion').textContent = data.last_motion;
+                }
+                // Play short beep only once per new motion event
+                if (data.motion && !lastMotionState) {
+                    alarmAudio.play();
+                }
+                lastMotionState = data.motion;
+            });
+    }
+    setInterval(updateMotionStatus, 3000);
+</script>
+{% endblock %} 

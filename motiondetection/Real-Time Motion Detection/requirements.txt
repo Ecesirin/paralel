@@ -1,0 +1,7 @@
+opencv-python>=4.8.0
+numpy>=1.26.0
+flask>=2.0.0
+flask-sqlalchemy>=3.0.0
+flask-login>=0.6.0
+werkzeug>=2.0.0
+mpi4py>=3.1.0 
